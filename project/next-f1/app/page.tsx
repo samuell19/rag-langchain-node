@@ -52,8 +52,7 @@ export default function Home() {
       }
 
       setMessages((prev) => [...prev, assistantMessage])
-
-      // Read the response as text stream
+      
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
 
