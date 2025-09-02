@@ -46,11 +46,11 @@ export async function POST(req: Request) {
             docContext = ""
         }
 
-        const systemPrompt = `Você é um especialista em Fórmula 1. Use as seguintes informações do contexto para responder às perguntas:
+        const systemPrompt = `Você é um bibliotecário com livros como base de conhecimento. Use as seguintes informações do contexto para responder às perguntas:
         
         Contexto: ${docContext}
         
-        Responda de forma clara e informativa sobre Fórmula 1.`
+        Responda de forma clara e informativa sobre o livro e o que foi perguntado.`
 
         console.log("Calling streamText...");
         const result = await streamText({
