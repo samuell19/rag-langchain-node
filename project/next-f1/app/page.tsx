@@ -1,7 +1,5 @@
 "use client"
-import Image from "next/image"
 import type React from "react"
-import f1GPTLogo from "./assets/f11.png"
 import { useState } from "react"
 
 interface Message {
@@ -15,6 +13,7 @@ export default function Home() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
+  //adiciona as mensagens do usuario a lista de mensagens e faz um fetch pro back enviando as mensagens
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
@@ -29,6 +28,7 @@ export default function Home() {
     setInput("")
     setIsLoading(true)
 
+    //vai enviar uma requisição pro back 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -55,7 +55,7 @@ export default function Home() {
       
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
-
+      //vai pegar aquelas partes da resposta que estão sendo streamadas
       if (reader) {
         while (true) {
           const { done, value } = await reader.read()
@@ -89,65 +89,103 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-red-600 to-red-800 text-white p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <Image
-            src={f1GPTLogo}
-            width={250}
-            height={120}
-            alt="F1 GPT Logo"
-            className="mx-auto mb-4"
-          />
-          <h1 className="text-4xl font-bold">F1 GPT</h1>
-        </div>
+    <div className="app-container">
+      <div className="chat-container">
+        <header className="header">
+          <div className="logo">
+            <div className="logo-icon">📚</div>
+            <h1 className="app-title">RAG Assistant</h1>
+          </div>
+          <p className="app-description">
+            Converse com seus documentos usando Retrieval-Augmented Generation
+          </p>
+        </header>
 
-        <section className={`${messages.length === 0 ? "text-center" : ""} space-y-4`}>
+        <div className="messages-container">
           {messages.length === 0 ? (
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8">
-              <p className="starter-text">Welcome to F1 GPT! Ask me anything about Formula 1.</p>
-              <p className="text-red-200">
-                From race results to driver stats, technical regulations to team histories - I'm here to help!
-              </p>
+            <div className="welcome-screen">
+              <div className="welcome-content">
+                <h2 className="welcome-title">Bem-vindo ao RAG Assistant</h2>
+                <p className="welcome-text">
+                  Faça perguntas sobre o conteúdo dos seus documentos. 
+                  Eu vou buscar informações relevantes e fornecer respostas precisas.
+                </p>
+                <div className="features">
+                  <div className="feature">
+                    <span className="feature-icon">🔍</span>
+                    <span>Busca semântica</span>
+                  </div>
+                  <div className="feature">
+                    <span className="feature-icon">🤖</span>
+                    <span>IA conversacional</span>
+                  </div>
+                  <div className="feature">
+                    <span className="feature-icon">📖</span>
+                    <span>Baseado em documentos</span>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+            <div className="messages-list">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`p-4 rounded-lg ${message.role === "user" ? "bg-white/20 ml-8" : "bg-white/10 mr-8"}`}
+                  className={`message ${message.role === "user" ? "message-user" : "message-assistant"}`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <div className="message-content">
+                    <div className="message-avatar">
+                      {message.role === "user" ? "👤" : "🤖"}
+                    </div>
+                    <div className="message-text">
+                      {message.content}
+                    </div>
+                  </div>
                 </div>
               ))}
               {isLoading && (
-                <div className="bg-white/10 mr-8 p-4 rounded-lg">
-                  <p className="text-red-200">Thinking...</p>
+                <div className="message message-assistant">
+                  <div className="message-content">
+                    <div className="message-avatar">🤖</div>
+                    <div className="message-text loading-text">
+                      <div className="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                      Processando...
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           )}
+        </div>
 
-          <form onSubmit={handleSubmit} className="mt-8">
-            <div className="flex gap-2">
-              <input
-                className="question-box"
-                onChange={(e) => setInput(e.target.value)}
-                value={input}
-                placeholder="Ask me anything about Formula 1..."
-                disabled={isLoading}
-              />
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="submit-button"
-              >
-                {isLoading ? "..." : "Ask"}
-              </button>
-            </div>
-          </form>
-        </section>
+        <form onSubmit={handleSubmit} className="input-form">
+          <div className="input-container">
+            <input
+              type="text"
+              className="message-input"
+              onChange={(e) => setInput(e.target.value)}
+              value={input}
+              placeholder="Digite sua pergunta sobre os documentos..."
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="send-button"
+            >
+              {isLoading ? (
+                <div className="button-loading">⏳</div>
+              ) : (
+                <div className="button-icon">➤</div>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
-    </main>
+    </div>
   )
 }
